@@ -1,0 +1,24 @@
+---
+import ProductsSearch from '../../../../components/vue/ProductsSearch.vue';
+import Layout from '../../../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { country: "uk", language: "en", }},
+    { params: { country: "it", language: "it",}},
+  ];
+}
+
+const { country, language } = Astro.params;
+const indexes = {
+  "uk": "staging_products_uk_en-gb",
+  "it": "staging_products_it_it",
+}
+
+const productsIndex = indexes[country]
+---
+
+<Layout>
+  <h1>Products page for {country}/{language}</h1>
+  <ProductsSearch client:only country={country} language={language} productsIndex={productsIndex} />
+</Layout>

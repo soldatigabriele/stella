@@ -1,9 +1,8 @@
 ---
 import ProductsSearch from '../components/vue/ProductsSearch.vue';
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html>
-<body>
-    <ProductsSearch client:only /></ProductsSearch>
-</body>
-</html>
+<Layout>
+    <ProductsSearch client:only />
+</Layout>

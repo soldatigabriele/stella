@@ -1,8 +1,10 @@
 <template>
   <div class="products-search" id="products-page">
+   
+
     <h1>Products Search</h1>
 
-    <ais-instant-search :search-client="searchClient" index-name="products_uk_en-gb" :routing="routing">
+    <ais-instant-search :search-client="searchClient" :index-name="productsIndex" :routing="routing">
       <!-- Search Box -->
       <ais-search-box placeholder="Search for products..." />
 
@@ -79,6 +81,17 @@ export default {
     AisHighlight,
     AisPagination,
     AisRefinementList,
+  },
+  props: {
+    country: {
+      type: String,
+    },
+    language: {
+      type: String,
+    },
+    productsIndex: {
+      type: String,
+    },
   },
   setup() {
     const searchClient = instantMeiliSearch(
