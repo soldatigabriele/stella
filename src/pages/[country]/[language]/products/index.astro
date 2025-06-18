@@ -23,6 +23,5 @@ const productsIndex = indexes[country]
 ---
 
 <Layout>
-  <h1>{t_lang('Products', language)}</h1>
   <ProductsSearch client:only country={country} language={language} productsIndex={productsIndex} />
 </Layout>

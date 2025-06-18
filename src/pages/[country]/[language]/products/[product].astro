@@ -1,5 +1,6 @@
 ---
 import Layout from "../../../../layouts/Layout.astro";
+import "../../../../styles/product-page.scss";
 
 export async function getStaticPaths() {
   const locales = [
@@ -109,7 +110,7 @@ let haveLength = false;
 let haveWeight = false;
 let haveVendReady = false;
 
-p.variations?.forEach((v) => {
+p.variations?.forEach((v: any) => {
   if (v.unit_width > 0) haveWidth = true;
   if (v.unit_height > 0) haveHeight = true;
   if (v.unit_length > 0) haveLength = true;
@@ -119,225 +120,236 @@ p.variations?.forEach((v) => {
 ---
 
 <Layout>
-  <button onclick="window.history.back()">Back</button>
+  <div class="product-page">
+    <button class="back-button" onclick="window.history.back()">Back</button>
 
-  <header>
-    <h1>{p.web_title}</h1>
-    <p>{p.long_description}</p>
-    <p>SKU: {p.sku_id}</p>
-  </header>
+    <div class="product-container">
+      <header class="product-header">
+        <h1>{p.web_title}</h1>
+        <p class="description">{p.long_description}</p>
+        <p class="sku">SKU: {p.sku_id}</p>
+      </header>
 
-  <section>
-    <h2>Images</h2>
-    <img
-      src={`https://res.cloudinary.com/globusgroup/image/upload/w_400,h_400,f_auto,c_pad/PIM/${firstImage}`}
-      alt={p.product_name}
-      style="max-width:300px;"
-    />
-  </section>
+      <section class="product-section image-section">
+        <h2>Images</h2>
+        <img
+          src={`https://res.cloudinary.com/globusgroup/image/upload/w_400,h_400,f_auto,c_pad/PIM/${firstImage}`}
+          alt={p.product_name}
+        />
+      </section>
 
-  <section>
-    <h2>Features</h2>
-    <ul>
-      {
-        p.bullet_points && Array.isArray(p.bullet_points)
-          ? p.bullet_points?.map((bp) => <li>{bp}</li>)
-          : ""
-      }
-    </ul>
-  </section>
+      <section class="product-section">
+        <h2>Features</h2>
+        <ul class="features-list">
+          {
+            p.bullet_points && Array.isArray(p.bullet_points)
+              ? p.bullet_points?.map((bp: any) => <li>{bp}</li>)
+              : ""
+          }
+        </ul>
+      </section>
 
-  <section>
-    <h2>Product Variations</h2>
-    <ul>
-      {p.variations?.map((v) => <li>{v.variation_name ?? v.sku_id}</li>)}
-    </ul>
-  </section>
+      <section class="product-section">
+        <h2>Product Variations</h2>
+        <ul class="variations-list">
+          {p.variations?.map((v: any) => <li>{v.variation_name ?? v.sku_id}</li>)}
+        </ul>
+      </section>
 
-  <h2>Available Options</h2>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Product Code</th>
-        <th>Size</th>
-        {haveVendReady && <th>Vending Machine Ready</th>}
-        {haveWidth && <th>Width</th>}
-        {haveLength && <th>Length</th>}
-        {haveHeight && <th>Height</th>}
-        {haveWeight && <th>Weight</th>}
-      </tr>
-    </thead>
-    <tbody>
-      {
-        p.variations?.map((v) => (
-          <tr>
-            <td>{v.sku_id}</td>
-            <td>{v.size ?? "-"}</td>
-            {haveVendReady && <td>{v.vend_ready === "1" ? "✓" : "✗"}</td>}
-            {haveWidth && (
-              <td>
-                {v.unit_width ?? "-"}
-                {v.unit_size_unit_of_measure ?? ""}
-              </td>
-            )}
-            {haveLength && (
-              <td>
-                {v.unit_length ?? "-"}
-                {v.unit_size_unit_of_measure ?? ""}
-              </td>
-            )}
-            {haveHeight && (
-              <td>
-                {v.unit_height ?? "-"}
-                {v.unit_size_unit_of_measure ?? ""}
-              </td>
-            )}
-            {haveWeight && (
-              <td>
-                {v.unit_weight ?? "-"}
-                {v.unit_weight_unit_of_measure ?? ""}
-              </td>
-            )}
-          </tr>
-        ))
-      }
-    </tbody>
-  </table>
+      <section class="product-section">
+        <h2>Available Options</h2>
+        <table class="options-table">
+          <thead>
+            <tr>
+              <th>Product Code</th>
+              <th>Size</th>
+              {haveVendReady && <th>Vending Machine Ready</th>}
+              {haveWidth && <th>Width</th>}
+              {haveLength && <th>Length</th>}
+              {haveHeight && <th>Height</th>}
+              {haveWeight && <th>Weight</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              p.variations?.map((v: any) => (
+                <tr>
+                  <td>{v.sku_id}</td>
+                  <td>{v.size ?? "-"}</td>
+                  {haveVendReady && <td>{v.vend_ready === "1" ? "✓" : "✗"}</td>}
+                  {haveWidth && (
+                    <td>
+                      {v.unit_width ?? "-"}
+                      {v.unit_size_unit_of_measure ?? ""}
+                    </td>
+                  )}
+                  {haveLength && (
+                    <td>
+                      {v.unit_length ?? "-"}
+                      {v.unit_size_unit_of_measure ?? ""}
+                    </td>
+                  )}
+                  {haveHeight && (
+                    <td>
+                      {v.unit_height ?? "-"}
+                      {v.unit_size_unit_of_measure ?? ""}
+                    </td>
+                  )}
+                  {haveWeight && (
+                    <td>
+                      {v.unit_weight ?? "-"}
+                      {v.unit_weight_unit_of_measure ?? ""}
+                    </td>
+                  )}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </section>
 
-  <h2>Product Specifics</h2>
-  <ul>
-    {
-      p.sku_id && (
-        <li>
-          <strong>Master SKU:</strong> {p.sku_id}
-        </li>
-      )
-    }
-    {
-      p.liner && (
-        <li>
-          <strong>Liner:</strong>{" "}
-          {Array.isArray(p.liner) ? p.liner.join(", ") : p.liner}
-        </li>
-      )
-    }
-    {
-      p.coating && (
-        <li>
-          <strong>Coating:</strong>{" "}
-          {Array.isArray(p.coating) ? p.coating.join(", ") : p.coating}
-        </li>
-      )
-    }
-    {
-      p.coating_type && (
-        <li>
-          <strong>Coating Type:</strong> {p.coating_type}
-        </li>
-      )
-    }
-    {
-      p.construction_type && (
-        <li>
-          <strong>Construction Type:</strong> {p.construction_type}
-        </li>
-      )
-    }
-    {
-      p.back_material && (
-        <li>
-          <strong>Back Material:</strong>{" "}
-          {Array.isArray(p.back_material)
-            ? p.back_material.join(", ")
-            : p.back_material}
-        </li>
-      )
-    }
-    {
-      p.palm_material && (
-        <li>
-          <strong>Palm Material:</strong>{" "}
-          {Array.isArray(p.palm_material)
-            ? p.palm_material.join(", ")
-            : p.palm_material}
-        </li>
-      )
-    }
-    {
-      p.biodegradable === "1" && (
-        <li>
-          <strong>Biodegradable:</strong> ✓
-        </li>
-      )
-    }
-    {
-      p.touchscreen === "1" && (
-        <li>
-          <strong>Touchscreen:</strong> ✓
-        </li>
-      )
-    }
-    {
-      p.food_safe === "1" && (
-        <li>
-          <strong>Food Safe:</strong> ✓
-        </li>
-      )
-    }
-    {
-      p.series && (
-        <li>
-          <strong>Series:</strong> {p.series}
-        </li>
-      )
-    }
-    {
-      p.gauge && (
-        <li>
-          <strong>Gauge:</strong> {p.gauge}
-        </li>
-      )
-    }
-    {
-      p.cuff_style && (
-        <li>
-          <strong>Cuff Style:</strong> {p.cuff_style}
-        </li>
-      )
-    }
-  </ul>
+      <section class="product-section">
+        <h2>Product Specifics</h2>
+        <ul class="details-list">
+          {
+            p.sku_id && (
+              <li>
+                <strong>Master SKU:</strong> {p.sku_id}
+              </li>
+            )
+          }
+          {
+            p.liner && (
+              <li>
+                <strong>Liner:</strong>{" "}
+                {Array.isArray(p.liner) ? p.liner.join(", ") : p.liner}
+              </li>
+            )
+          }
+          {
+            p.coating && (
+              <li>
+                <strong>Coating:</strong>{" "}
+                {Array.isArray(p.coating) ? p.coating.join(", ") : p.coating}
+              </li>
+            )
+          }
+          {
+            p.coating_type && (
+              <li>
+                <strong>Coating Type:</strong> {p.coating_type}
+              </li>
+            )
+          }
+          {
+            p.construction_type && (
+              <li>
+                <strong>Construction Type:</strong> {p.construction_type}
+              </li>
+            )
+          }
+          {
+            p.back_material && (
+              <li>
+                <strong>Back Material:</strong>{" "}
+                {Array.isArray(p.back_material)
+                  ? p.back_material.join(", ")
+                  : p.back_material}
+              </li>
+            )
+          }
+          {
+            p.palm_material && (
+              <li>
+                <strong>Palm Material:</strong>{" "}
+                {Array.isArray(p.palm_material)
+                  ? p.palm_material.join(", ")
+                  : p.palm_material}
+              </li>
+            )
+          }
+          {
+            p.biodegradable === "1" && (
+              <li>
+                <strong>Biodegradable:</strong> <span class="checkmark">✓</span>
+              </li>
+            )
+          }
+          {
+            p.touchscreen === "1" && (
+              <li>
+                <strong>Touchscreen:</strong> <span class="checkmark">✓</span>
+              </li>
+            )
+          }
+          {
+            p.food_safe === "1" && (
+              <li>
+                <strong>Food Safe:</strong> <span class="checkmark">✓</span>
+              </li>
+            )
+          }
+          {
+            p.series && (
+              <li>
+                <strong>Series:</strong> {p.series}
+              </li>
+            )
+          }
+          {
+            p.gauge && (
+              <li>
+                <strong>Gauge:</strong> {p.gauge}
+              </li>
+            )
+          }
+          {
+            p.cuff_style && (
+              <li>
+                <strong>Cuff Style:</strong> {p.cuff_style}
+              </li>
+            )
+          }
+        </ul>
+      </section>
 
-  <h2>Certifications</h2>
-  <ul>
-    {p.ce === "1" && <li>CE: ✓</li>}
-    {
-      p.certificate_number && (
-        <li>CE Certificate Number: {p.certificate_number}</li>
-      )
-    }
-    {p.ppe_cat_level && <li>Cat Level: {p.ppe_cat_level}</li>}
-    {p.ukca === "1" && <li>UKCA: ✓</li>}
-    {
-      p.certifications?.map?.((cert) => (
-        <li>
-          {cert.label}: {cert.passed === "1" ? "✓" : cert.value}
-        </li>
-      ))
-    }
-  </ul>
+      <section class="product-section">
+        <h2>Certifications</h2>
+        <ul class="details-list">
+          {p.ce === "1" && <li>CE: <span class="checkmark">✓</span></li>}
+          {
+            p.certificate_number && (
+              <li>CE Certificate Number: {p.certificate_number}</li>
+            )
+          }
+          {p.ppe_cat_level && <li>Cat Level: {p.ppe_cat_level}</li>}
+          {p.ukca === "1" && <li>UKCA: <span class="checkmark">✓</span></li>}
+          {
+            p.certifications?.map?.((cert: any) => (
+              <li>
+                {cert.label}: {cert.passed === "1" ? <span class="checkmark">✓</span> : cert.value}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
 
-  <h2>Options</h2>
-  <select>
-    {
-      p.variations?.map((v) => (
-        <option value={v.sku_id}>
-          {v.variation_name ?? `${v.primary_colour ?? ""} - ${v.size ?? ""}`}
-        </option>
-      ))
-    }
-  </select>
+      <section class="product-section">
+        <h2>Options</h2>
+        <select class="options-select">
+          {
+            p.variations?.map((v: any) => (
+              <option value={v.sku_id}>
+                {v.variation_name ?? `${v.primary_colour ?? ""} - ${v.size ?? ""}`}
+              </option>
+            ))
+          }
+        </select>
+      </section>
+    </div>
 
-  <footer>
-    <p>Slug: {product}</p>
-  </footer>
+    <footer class="product-footer">
+      <p>Slug: {product}</p>
+    </footer>
+  </div>
 </Layout>
