@@ -1,6 +1,9 @@
 <template>
   <div class="products-search" id="products-page">
     <ais-instant-search :search-client="searchClient" :index-name="productsIndex" :routing="routing">
+
+      <ais-configure :hits-per-page.camel="12" :attributes-to-retrieve.camel="attributesToRetrieve" />
+
       <!-- Search Header -->
       <div class="search-header">
         <ais-search-box placeholder="Search for products..." />
@@ -59,7 +62,7 @@
                       <ais-highlight attribute="product_name" :hit="item" />
                     </h3>
                     <p class="hit-description">
-                      <ais-highlight attribute="long_description" :hit="item" />
+                      <ais-highlight attribute="tagline" :hit="item" />
                     </p>
                     <div class="hit-details">
                       <span class="hit-sku">SKU: {{ item.sku_id }}</span>
@@ -95,6 +98,8 @@ import {
   AisHighlight,
   AisPagination,
   AisRefinementList,
+  AisConfigure,
+  AisHitsPerPage,
 } from "vue-instantsearch/vue3/es";
 
 export default {
@@ -107,6 +112,8 @@ export default {
     AisHighlight,
     AisPagination,
     AisRefinementList,
+    AisHitsPerPage,
+    AisConfigure,
   },
   props: {
     country: {
@@ -119,12 +126,17 @@ export default {
       type: String,
     },
   },
+  data() {
+    return {
+      attributesToRetrieve: ["product_name", "slug", "brand", "tagline", "liner", "sku_id", "series", "variations.product_images"],
+    };
+  },
   setup() {
     const searchClient = instantMeiliSearch(
       // "http://localhost:7700",
       // "df7b16d3dda117c0e2118b283b1b3fe21f331daaec06d9eb993dc7eb8ab162ef"
       "https://ms-prd-prd.globusgroup.com",
-      "de0eef89f10d34658c1938d82e2203b9f1940d91c043c2c1e5a90cfce9729ebf"
+      "de0eef89f10d34658c1938d82e2203b9f1940d91c043c2c1e5a90cfce9729ebf",
     ).searchClient;
 
     const routing = {
