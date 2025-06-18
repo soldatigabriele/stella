@@ -40,14 +40,134 @@ const response = await fetch(
 );
 const { hits } = await response.json();
 const p = hits[0];
+
+
+// Prepare fallback image
+const firstVariation = p.variations?.[0];
+const firstImage = firstVariation?.product_images?.[0]?.filename ?? 'no-img-transparent.png';
+
+
+// Flags for table columns
+let haveWidth = false;
+let haveHeight = false;
+let haveLength = false;
+let haveWeight = false;
+let haveVendReady = false;
+
+p.variations?.forEach((v) => {
+  if (v.unit_width > 0) haveWidth = true;
+  if (v.unit_height > 0) haveHeight = true;
+  if (v.unit_length > 0) haveLength = true;
+  if (v.unit_weight > 0) haveWeight = true;
+  if (v.vend_ready === "1") haveVendReady = true;
+});
+
 ---
 
-<html>
+<html lang="en">
+  <head>
+    <title>{p.web_title}</title>
+  </head>
   <body>
-    <h1>{p.web_title}</h1>
-    <hr>
-    <div>{p.long_description}</div>
-    <hr>
-    <p>Slug: {product}</p>
+    <button onclick="window.history.back()">Back</button>
+
+    <header>
+      <h1>{p.web_title}</h1>
+      <p>{p.long_description}</p>
+      <p>SKU: {p.sku_id}</p>
+    </header>
+
+    <section>
+      <h2>Images</h2>
+      <img 
+        src={`https://res.cloudinary.com/globusgroup/image/upload/w_400,h_400,f_auto,c_pad/PIM/${firstImage}`} 
+        alt={p.product_name} 
+        style="max-width:300px;"
+      />
+    </section>
+
+    <section>
+      <h2>Features</h2>
+      <ul>
+        {p.bullet_points && Array.isArray(p.bullet_points) ? p.bullet_points?.map((bp) => <li>{bp}</li>) : ''}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Product Variations</h2>
+      <ul>
+        {p.variations?.map((v) => (
+          <li>{v.variation_name ?? v.sku_id}</li>
+        ))}
+      </ul>
+    </section>
+
+
+    <h2>Available Options</h2>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Product Code</th>
+          <th>Size</th>
+          {haveVendReady && <th>Vending Machine Ready</th>}
+          {haveWidth && <th>Width</th>}
+          {haveLength && <th>Length</th>}
+          {haveHeight && <th>Height</th>}
+          {haveWeight && <th>Weight</th>}
+        </tr>
+      </thead>
+      <tbody>
+        {p.variations?.map((v) => (
+          <tr>
+            <td>{v.sku_id}</td>
+            <td>{v.size ?? "-"}</td>
+            {haveVendReady && <td>{v.vend_ready === "1" ? "✓" : "✗"}</td>}
+            {haveWidth && <td>{v.unit_width ?? "-"}{v.unit_size_unit_of_measure ?? ""}</td>}
+            {haveLength && <td>{v.unit_length ?? "-"}{v.unit_size_unit_of_measure ?? ""}</td>}
+            {haveHeight && <td>{v.unit_height ?? "-"}{v.unit_size_unit_of_measure ?? ""}</td>}
+            {haveWeight && <td>{v.unit_weight ?? "-"}{v.unit_weight_unit_of_measure ?? ""}</td>}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <h2>Product Specifics</h2>
+    <ul>
+      {p.sku_id && <li><strong>Master SKU:</strong> {p.sku_id}</li>}
+      {p.liner && <li><strong>Liner:</strong> {Array.isArray(p.liner) ? p.liner.join(", ") : p.liner}</li>}
+      {p.coating && <li><strong>Coating:</strong> {Array.isArray(p.coating) ? p.coating.join(", ") : p.coating}</li>}
+      {p.coating_type && <li><strong>Coating Type:</strong> {p.coating_type}</li>}
+      {p.construction_type && <li><strong>Construction Type:</strong> {p.construction_type}</li>}
+      {p.back_material && <li><strong>Back Material:</strong> {Array.isArray(p.back_material) ? p.back_material.join(", ") : p.back_material}</li>}
+      {p.palm_material && <li><strong>Palm Material:</strong> {Array.isArray(p.palm_material) ? p.palm_material.join(", ") : p.palm_material}</li>}
+      {p.biodegradable === "1" && <li><strong>Biodegradable:</strong> ✓</li>}
+      {p.touchscreen === "1" && <li><strong>Touchscreen:</strong> ✓</li>}
+      {p.food_safe === "1" && <li><strong>Food Safe:</strong> ✓</li>}
+      {p.series && <li><strong>Series:</strong> {p.series}</li>}
+      {p.gauge && <li><strong>Gauge:</strong> {p.gauge}</li>}
+      {p.cuff_style && <li><strong>Cuff Style:</strong> {p.cuff_style}</li>}
+    </ul>
+
+    <h2>Certifications</h2>
+    <ul>
+      {p.ce === "1" && <li>CE: ✓</li>}
+      {p.certificate_number && <li>CE Certificate Number: {p.certificate_number}</li>}
+      {p.ppe_cat_level && <li>Cat Level: {p.ppe_cat_level}</li>}
+      {p.ukca === "1" && <li>UKCA: ✓</li>}
+      {p.certifications?.map?.((cert) => (
+        <li>{cert.label}: {cert.passed === "1" ? "✓" : cert.value}</li>
+      ))}
+    </ul>
+
+    <h2>Options</h2>
+    <select>
+      {p.variations?.map((v) => (
+        <option value={v.sku_id}>{v.variation_name ?? `${v.primary_colour ?? ""} - ${v.size ?? ""}`}</option>
+      ))}
+    </select>
+    
+    <footer>
+      <p>Slug: {product}</p>
+    </footer>
   </body>
 </html>
