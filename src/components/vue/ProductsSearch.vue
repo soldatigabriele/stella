@@ -4,20 +4,14 @@
 
       <ais-configure :hits-per-page.camel="12" :attributes-to-retrieve.camel="attributesToRetrieve" />
 
-      <!-- Search Header -->
-      <div class="search-header">
-        <ais-search-box placeholder="Search for products..." />
-        <ais-stats />
-      </div>
-
       <!-- Main Content -->
       <div class="search-content">
         <!-- Filters Sidebar -->
         <div class="filters-sidebar">
-          <h3 class="filters-title">Filters</h3>
+          <h3 class="filters-title">{{ t('Filters') }}</h3>
 
           <div class="filter-section">
-            <h4 class="filter-title">Brand</h4>
+            <h4 class="filter-title">{{ t('Brand') }}</h4>
             <ais-refinement-list
               :limit="1000"
               attribute="brand"
@@ -32,7 +26,7 @@
           </div>
 
           <div class="filter-section">
-            <h4 class="filter-title">Liner</h4>
+            <h4 class="filter-title">{{ t('Liner') }}</h4>
             <ais-refinement-list
               :limit="1000"
               attribute="liner"
@@ -49,6 +43,11 @@
 
         <!-- Results Area -->
         <div class="results-area">
+          <!-- Search Box - positioned above products -->
+          <div class="search-box-container">
+            <ais-search-box :placeholder="t('Search by SKU, Name, or Description')" />
+          </div>
+
           <!-- Search Results -->
           <ais-hits>
             <template v-slot:item="{ item }">
@@ -191,46 +190,6 @@ export default {
     min-height: 100vh;
   }
 
-  // Search Header
-  .search-header {
-    background: white;
-    padding: 32px;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    margin-bottom: 24px;
-  }
-
-  .ais-SearchBox {
-    margin-bottom: 16px;
-  }
-
-  .ais-SearchBox-input {
-    width: 100%;
-    padding: 16px 20px;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 16px;
-    background: #ffffff;
-    transition: all 0.2s ease;
-
-    &:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    &::placeholder {
-      color: #94a3b8;
-    }
-  }
-
-  .ais-Stats {
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
   // Main Content Layout
   .search-content {
     display: grid;
@@ -321,6 +280,36 @@ export default {
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  // Search Box - positioned above products
+  .search-box-container {
+    padding: 24px;
+    border-bottom: 1px solid #f1f5f9;
+
+    .ais-SearchBox {
+      margin: 0;
+    }
+
+    .ais-SearchBox-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      }
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+    }
   }
 
   // Hits Container - Grid Layout
@@ -556,8 +545,8 @@ export default {
       padding: 16px;
     }
 
-    .search-header {
-      padding: 20px;
+    .search-box-container {
+      padding: 16px;
     }
 
     .filters-sidebar {
