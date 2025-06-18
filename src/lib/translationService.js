@@ -1,8 +1,8 @@
 let cachedTranslations = null;
 
 export async function getTranslations() {
-    console.log('getTranslations');
-  if (cachedTranslations) return cachedTranslations;
+    if (cachedTranslations) return cachedTranslations;
+    console.log('get new Translations');
 
   const res = await fetch('https://polyglot.globusgroup.com/api/v1/translations');
   if (!res.ok) {
