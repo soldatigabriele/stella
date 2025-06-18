@@ -9,6 +9,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.9.4"
+    "@astrojs/vue": "^5.1.0",
+    "@meilisearch/instant-meilisearch": "^0.27.0",
+    "astro": "^5.9.4",
+    "vue": "^3.5.16",
+    "vue-instantsearch": "^4.21.0"
+  },
+  "devDependencies": {
+    "sass-embedded": "^1.89.2"
   }
 }
