@@ -121,8 +121,10 @@ export default {
   },
   setup() {
     const searchClient = instantMeiliSearch(
-      "http://localhost:7700",
-      "df7b16d3dda117c0e2118b283b1b3fe21f331daaec06d9eb993dc7eb8ab162ef"
+      // "http://localhost:7700",
+      // "df7b16d3dda117c0e2118b283b1b3fe21f331daaec06d9eb993dc7eb8ab162ef"
+      "https://ms-prd-prd.globusgroup.com",
+      "de0eef89f10d34658c1938d82e2203b9f1940d91c043c2c1e5a90cfce9729ebf"
     ).searchClient;
 
     const routing = {
