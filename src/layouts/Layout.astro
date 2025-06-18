@@ -35,8 +35,8 @@ const pageTranslations = translations[language] || {};
 					</div>
 					
 					<nav id="navigation" class="navigation">
-						<a href={`${siteUrl}/`} class="nav-link">Home</a>
-						<a href={`${siteUrl}/products`} class="nav-link">Products</a>
+						<a href={`${siteUrl}/`} class="nav-link">{pageTranslations.Homepage || 'Homepage'}</a>
+						<a href={`${siteUrl}/products`} class="nav-link">{pageTranslations.products || 'Products'}</a>
 					</nav>
 					
 					<div id="language-switcher" class="language-switcher">
