@@ -6,6 +6,7 @@ export function getStaticPaths() {
   return [
     { params: { country: "uk", language: "en", }},
     { params: { country: "it", language: "it",}},
+    { params: { country: "de", language: "de",}},
   ];
 }
 
@@ -13,6 +14,7 @@ const { country, language } = Astro.params;
 const indexes = {
   "uk": "staging_products_uk_en-gb",
   "it": "staging_products_it_it",
+  "de": "staging_products_de_de",
 }
 
 const productsIndex = indexes[country]

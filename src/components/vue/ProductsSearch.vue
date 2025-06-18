@@ -1,8 +1,5 @@
 <template>
   <div class="products-search" id="products-page">
-   
-
-    <h1>Products Search</h1>
 
     <ais-instant-search :search-client="searchClient" :index-name="productsIndex" :routing="routing">
       <!-- Search Box -->
@@ -32,7 +29,7 @@
             </div>
             <div class="hit-content">
               <h3>
-                <a :href="`/products/${item.slug}`">
+                <a :href="`/${country}/${language}/products/${item.slug}`">
                   <ais-highlight attribute="product_name" :hit="item" />
                 </a>
               </h3>
