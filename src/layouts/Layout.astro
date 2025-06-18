@@ -40,9 +40,9 @@ const pageTranslations = translations[language] || {};
 					</nav>
 					
 					<div id="language-switcher" class="language-switcher">
-						<a href={ukUrl} class="language-link">🇬🇧 UK</a>
-						<a href={itUrl} class="language-link">🇮🇹 IT</a>
-						<a href={deUrl} class="language-link">🇩🇪 DE</a>
+						<a href={ukUrl} class={`language-link ${(language === 'en' || language === 'uk') ? 'active' : ''}`}>🇬🇧 UK</a>
+						<a href={itUrl} class={`language-link ${language === 'it' ? 'active' : ''}`}>🇮🇹 IT</a>
+						<a href={deUrl} class={`language-link ${language === 'de' ? 'active' : ''}`}>🇩🇪 DE</a>
 					</div>
 				</div>
 			</div>
@@ -178,6 +178,18 @@ const pageTranslations = translations[language] || {};
 		color: #667eea;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		transform: translateY(-1px);
+	}
+
+	.language-link.active {
+		background: #667eea;
+		color: white;
+		box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+		transform: translateY(-1px);
+	}
+
+	.language-link.active:hover {
+		background: #5a67d8;
+		color: white;
 	}
 
 	/* Main Content */
