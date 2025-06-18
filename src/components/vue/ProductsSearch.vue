@@ -1,6 +1,5 @@
 <template>
   <div class="products-search" id="products-page">
-
     <ais-instant-search :search-client="searchClient" :index-name="productsIndex" :routing="routing">
       <!-- Search Box -->
       <ais-search-box placeholder="Search for products..." />
@@ -11,6 +10,18 @@
       <ais-refinement-list
         :limit="1000"
         attribute="brand"
+        :sort-by="['name:asc']"
+        :class-names="{
+                'ais-RefinementList-label': 'filter-checkbox-container',
+                'ais-RefinementList-labelText': 'filter-label',
+                'ais-RefinementList-checkbox': 'filter-checkbox',
+                'ais-RefinementList-count': 'counter',
+            }"
+      />
+
+      <ais-refinement-list
+        :limit="1000"
+        attribute="liner"
         :sort-by="['name:asc']"
         :class-names="{
                 'ais-RefinementList-label': 'filter-checkbox-container',
@@ -58,6 +69,7 @@
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import { simple } from "instantsearch.js/es/lib/stateMappings";
 import { history } from "instantsearch.js/es/lib/routers";
+
 import {
   AisInstantSearch,
   AisSearchBox,
@@ -117,6 +129,22 @@ export default {
       routing,
       getProductImage,
     };
+  },
+  methods: {
+    t(key, ...args) {
+      const langTranslations = window.translationsJSON;
+
+      const str = langTranslations?.[key] || key;
+      return str.replace(/{(\d+)}/g, (match, number) =>
+        typeof args[number] !== "undefined" ? args[number] : match
+      );
+    },
+    transformItems(items) {
+      return items.map((item) => ({
+        ...item,
+        label: this.t(item.label),
+      }));
+    },
   },
 };
 </script>

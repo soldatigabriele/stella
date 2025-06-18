@@ -1,6 +1,7 @@
 ---
 import ProductsSearch from '../../../../components/vue/ProductsSearch.vue';
 import Layout from '../../../../layouts/Layout.astro';
+import { t_lang } from '../../../../utils/translations.js';
 
 export function getStaticPaths() {
   return [
@@ -18,9 +19,10 @@ const indexes = {
 }
 
 const productsIndex = indexes[country]
+
 ---
 
 <Layout>
-  <h1>Products page for {country}/{language}</h1>
+  <h1>{t_lang('Products', language)}</h1>
   <ProductsSearch client:only country={country} language={language} productsIndex={productsIndex} />
 </Layout>

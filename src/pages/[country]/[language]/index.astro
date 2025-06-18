@@ -11,8 +11,10 @@ export function getStaticPaths() {
 
 const { country, language } = Astro.params;
 
+import { t_lang } from '../../../utils/translations.js';
+
 ---
 
 <Layout>
-	<h1>Homepage for {country}/{language}</h1>
+	<h1>{t_lang('Homepage', language)} {country}/{language}</h1>
 </Layout>

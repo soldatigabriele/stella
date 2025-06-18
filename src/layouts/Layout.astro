@@ -10,6 +10,12 @@ const parts = pathname.split('/').filter(Boolean);
 const itUrl = '/' + ['it', 'it', ...parts.slice(2)].join('/');
 const ukUrl = '/' + ['uk', 'en', ...parts.slice(2)].join('/');
 const deUrl = '/' + ['de', 'de', ...parts.slice(2)].join('/');
+
+import { getTranslations } from '../lib/translationService.js';
+const language = Astro.params.language || 'en';
+const translations = await getTranslations();
+const pageTranslations = translations[language] || {};
+
 ---
 
 <!doctype html>
@@ -17,7 +23,8 @@ const deUrl = '/' + ['de', 'de', ...parts.slice(2)].join('/');
 	<head>
 		<meta charset="UTF-8" />
 	</head>
-	<body>
+	<body data-site-language={language}>
+		
 		<div id="navigation">
 			<a href={`${siteUrl}/`}>Home</a>
 			<a href={`${siteUrl}/products`}>Products</a>
@@ -28,5 +35,10 @@ const deUrl = '/' + ['de', 'de', ...parts.slice(2)].join('/');
 			<a href={deUrl}>🇩🇪 DE</a>
 		  </div>
 		<slot />
+
+		<script is:inline define:vars={{ pageTranslations }}>
+			window.translationsJSON = pageTranslations;
+		  </script>
+		  
 	</body>
 </html>
