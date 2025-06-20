@@ -1,18 +1,21 @@
 <template>
   <div class="products-search" id="products-page">
     <ais-instant-search :search-client="searchClient" :index-name="productsIndex" :routing="routing">
-
       <ais-configure :hits-per-page.camel="12" :attributes-to-retrieve.camel="attributesToRetrieve" />
 
       <!-- Main Content -->
-      <div class="search-content">
+      <div class="search-content" :class="{ 'is-loading': isLoading }">
         <!-- Filters Sidebar -->
         <div class="filters-sidebar">
           <h3 class="filters-title">{{ t('Filters') }}</h3>
 
           <div class="filter-section">
             <h4 class="filter-title">{{ t('Brand') }}</h4>
+            <div v-if="isLoading" class="filter-skeleton">
+              <div class="skeleton-item" v-for="i in 5" :key="`brand-${i}`"></div>
+            </div>
             <ais-refinement-list
+              v-else
               :limit="1000"
               attribute="brand"
               :sort-by="['name:asc']"
@@ -27,7 +30,11 @@
 
           <div class="filter-section">
             <h4 class="filter-title">{{ t('Liner') }}</h4>
+            <div v-if="isLoading" class="filter-skeleton">
+              <div class="skeleton-item" v-for="i in 3" :key="`liner-${i}`"></div>
+            </div>
             <ais-refinement-list
+              v-else
               :limit="1000"
               attribute="liner"
               :sort-by="['name:asc']"
@@ -45,39 +52,62 @@
         <div class="results-area">
           <!-- Search Box - positioned above products -->
           <div class="search-box-container">
-            <ais-search-box :placeholder="t('Search by SKU, Name, or Description')" />
+            <!-- Search Box Skeleton -->
+            <div v-if="isLoading" class="search-box-skeleton">
+              <div class="skeleton-search-input"></div>
+            </div>
+            <!-- Actual Search Box -->
+            <ais-search-box v-show="!isLoading" :placeholder="t('Search by SKU, Name, or Description')" />
           </div>
 
           <!-- Search Results -->
-          <ais-hits>
-            <template v-slot:item="{ item }">
-              <a :href="`/${country}/${language}/products/${item.slug}`">
-                <div class="hit">
-                  <div class="hit-image">
-                    <img :src="getProductImage(item)" :alt="item.product_name" />
-                  </div>
-                  <div class="hit-content">
-                    <h3>
-                      <ais-highlight attribute="product_name" :hit="item" />
-                    </h3>
-                    <p class="hit-description">
-                      <ais-highlight attribute="tagline" :hit="item" />
-                    </p>
-                    <div class="hit-details">
-                      <span class="hit-sku">SKU: {{ item.sku_id }}</span>
-                      <span v-if="item.series" class="hit-series">Series: {{ item.series }}</span>
-                    </div>
-                    <div v-if="item.variations && item.variations.length > 0" class="hit-variations">
-                      <span>{{ item.variations.length }} variation{{ item.variations.length > 1 ? 's' : '' }} available</span>
-                    </div>
+          <div class="hits-container">
+            <!-- Loading Skeleton -->
+            <div v-if="isLoading" class="hits-skeleton">
+              <div class="skeleton-hit" v-for="i in 12" :key="`skeleton-${i}`">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                  <div class="skeleton-title"></div>
+                  <div class="skeleton-description"></div>
+                  <div class="skeleton-details">
+                    <div class="skeleton-tag"></div>
+                    <div class="skeleton-tag"></div>
                   </div>
                 </div>
-              </a>
-            </template>
-          </ais-hits>
+              </div>
+            </div>
+
+            <!-- Actual Results -->
+            <ais-hits v-show="!isLoading">
+              <template v-slot:item="{ item }">
+                <a :href="`/${country}/${language}/products/${item.slug}`">
+                  <div class="hit">
+                    <div class="hit-image">
+                      <img :src="getProductImage(item)" :alt="item.product_name" />
+                    </div>
+                    <div class="hit-content">
+                      <h3>
+                        <ais-highlight attribute="product_name" :hit="item" />
+                      </h3>
+                      <p class="hit-description">
+                        <ais-highlight attribute="tagline" :hit="item" />
+                      </p>
+                      <div class="hit-details">
+                        <span class="hit-sku">SKU: {{ item.sku_id }}</span>
+                        <span v-if="item.series" class="hit-series">Series: {{ item.series }}</span>
+                      </div>
+                      <div v-if="item.variations && item.variations.length > 0" class="hit-variations">
+                        <span>{{ item.variations.length }} variation{{ item.variations.length > 1 ? 's' : '' }} available</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </template>
+            </ais-hits>
+          </div>
 
           <!-- Pagination -->
-          <ais-pagination />
+          <ais-pagination v-show="!isLoading" />
         </div>
       </div>
     </ais-instant-search>
@@ -127,13 +157,42 @@ export default {
   },
   data() {
     return {
-      attributesToRetrieve: ["product_name", "slug", "brand", "tagline", "liner", "sku_id", "series", "variations.product_images"],
+      attributesToRetrieve: [
+        "product_name",
+        "slug",
+        "brand",
+        "tagline",
+        "liner",
+        "sku_id",
+        "series",
+        "variations.product_images",
+      ],
+      isLoading: true,
+      hasRendered: false,
     };
+  },
+  mounted() {
+    // Set a minimum loading time to prevent flash
+    const minLoadingTime = setTimeout(() => {
+      if (!this.hasRendered) {
+        this.isLoading = false;
+      }
+    }, 2000);
+
+    // Listen for the first search render to ensure data is ready
+    this.$nextTick(() => {
+      // Wait for InstantSearch to be available
+      setTimeout(() => {
+        this.hasRendered = true;
+        this.isLoading = false;
+        clearTimeout(minLoadingTime);
+      }, 600);
+    });
   },
   setup() {
     const searchClient = instantMeiliSearch(
       import.meta.env.PUBLIC_MEILISEARCH_URL,
-      import.meta.env.PUBLIC_MEILISEARCH_API_KEY,
+      import.meta.env.PUBLIC_MEILISEARCH_API_KEY
     ).searchClient;
 
     const routing = {
@@ -284,9 +343,11 @@ export default {
   .search-box-container {
     padding: 24px;
     border-bottom: 1px solid #f1f5f9;
+    position: relative;
 
     .ais-SearchBox {
       margin: 0;
+      transition: opacity 0.3s ease;
     }
 
     .ais-SearchBox-input {
@@ -307,6 +368,19 @@ export default {
       &::placeholder {
         color: #94a3b8;
       }
+    }
+  }
+
+  // Search Box Skeleton
+  .search-box-skeleton {
+    .skeleton-search-input {
+      width: 100%;
+      height: 42px; // Matches the actual input height (padding + content)
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
     }
   }
 
@@ -572,11 +646,170 @@ export default {
       justify-content: flex-start;
     }
   }
+
+  // Loading States & Skeleton UI
+  .search-content {
+    transition: opacity 0.3s ease;
+  }
+
+  .search-content.is-loading {
+    opacity: 0.9;
+  }
+
+  // Filter Skeleton
+  .filter-skeleton {
+    .skeleton-item {
+      height: 32px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // Hits Container
+  .hits-container {
+    position: relative;
+    min-height: 600px;
+  }
+
+  // Hits Skeleton
+  .hits-skeleton {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .skeleton-hit {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    background: white;
+    height: 380px;
+  }
+
+  .skeleton-image {
+    width: 90%;
+    height: 180px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skeleton-title {
+    height: 24px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+    width: 85%;
+  }
+
+  .skeleton-description {
+    height: 16px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    width: 95%;
+  }
+
+  .skeleton-details {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .skeleton-tag {
+    height: 20px;
+    width: 60px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+
+  // Shimmer Animation
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  // Smooth transitions for content appearance
+  .ais-Hits {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .ais-Hits[v-show="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ais-Hits[v-show="false"] {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  // Responsive skeleton adjustments
+  @media (max-width: 1200px) {
+    .hits-skeleton {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .hits-skeleton {
+      padding: 16px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hits-skeleton {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .skeleton-hit {
+      padding: 16px;
+      height: 340px;
+    }
+
+    .skeleton-image {
+      height: 160px;
+    }
+  }
 }
 .ais-SearchBox-submit {
   display: none;
 }
 .ais-SearchBox-reset {
   display: none;
+}
+.ais-RefinementList-list {
+  // hide bullet ponist
+  list-style-type: none;
 }
 </style>
