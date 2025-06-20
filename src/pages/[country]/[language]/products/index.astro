@@ -12,12 +12,12 @@ export function getStaticPaths() {
 
 const { country, language } = Astro.params;
 const indexes = {
-  "uk": "staging_products_uk_en-gb",
-  "it": "staging_products_it_it",
-  "de": "staging_products_de_de",
+  "uk": import.meta.env.SEARCH_INDEX_UK || "staging_products_uk_en-gb",
+  "it": import.meta.env.SEARCH_INDEX_IT || "staging_products_it_it",
+  "de": import.meta.env.SEARCH_INDEX_DE || "staging_products_de_de",
 }
 
-const productsIndex = indexes[country]
+const productsIndex = indexes[country as keyof typeof indexes]
 
 ---
 
