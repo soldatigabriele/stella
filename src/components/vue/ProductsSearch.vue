@@ -78,7 +78,7 @@
             </div>
 
             <!-- Actual Results -->
-            <ais-hits v-show="!isLoading">
+            <ais-hits v-show="!isLoading" :class="{ 'completely-hidden': isLoading }">
               <template v-slot:item="{ item }">
                 <a :href="`/${country}/${language}/products/${item.slug}`">
                   <div class="hit">
@@ -808,8 +808,30 @@ export default {
 .ais-SearchBox-reset {
   display: none;
 }
-.ais-RefinementList-list {
-  // hide bullet ponist
-  list-style-type: none;
-}
+  .ais-RefinementList-list {
+    // hide bullet ponist
+    list-style-type: none;
+  }
+
+  // Hide InstantSearch default loading states
+  .ais-Hits--loading,
+  .ais-RefinementList--loading,
+  .ais-SearchBox--loading {
+    display: none !important;
+  }
+
+  // Hide any loading indicators from InstantSearch
+  .ais-Hits .ais-Hits-loading,
+  .ais-RefinementList .ais-RefinementList-loading {
+    display: none !important;
+  }
+
+  // Completely hide hits component during loading
+  .ais-Hits.completely-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
 </style>
