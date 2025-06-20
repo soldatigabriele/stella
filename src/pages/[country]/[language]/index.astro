@@ -1,12 +1,9 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import { getStaticPaths as getLocaleStaticPaths } from '../../../config/locales.js';
 
 export function getStaticPaths() {
-  return [
-    { params: { country: "uk", language: "en", }},
-    { params: { country: "it", language: "it",}},
-    { params: { country: "de", language: "de",}},
-  ];
+  return getLocaleStaticPaths();
 }
 
 const { country, language } = Astro.params;

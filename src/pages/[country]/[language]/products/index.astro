@@ -1,22 +1,14 @@
 ---
 import ProductsSearch from '../../../../components/vue/ProductsSearch.vue';
 import Layout from '../../../../layouts/Layout.astro';
+import { getStaticPaths as getLocaleStaticPaths, getIndexes } from '../../../../config/locales.js';
 
 export function getStaticPaths() {
-  return [
-    { params: { country: "uk", language: "en", }},
-    { params: { country: "it", language: "it",}},
-    { params: { country: "de", language: "de",}},
-  ];
+  return getLocaleStaticPaths();
 }
 
 const { country, language } = Astro.params;
-const indexes = {
-  "uk": import.meta.env.SEARCH_INDEX_UK || "staging_products_uk_en-gb",
-  "it": import.meta.env.SEARCH_INDEX_IT || "staging_products_it_it",
-  "de": import.meta.env.SEARCH_INDEX_DE || "staging_products_de_de",
-}
-
+const indexes = getIndexes();
 const productsIndex = indexes[country as keyof typeof indexes]
 
 ---

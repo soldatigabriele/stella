@@ -3,18 +3,11 @@ import Layout from "../../../../layouts/Layout.astro";
 import "../../../../styles/product-page.scss";
 import fs from "fs";
 import path from "path";
+import { LOCALES, getIndexes } from '../../../../config/locales.js';
 
 export async function getStaticPaths() {
-  const locales = [
-    { country: "uk", language: "en" },
-    { country: "it", language: "it" },
-    { country: "de", language: "de" },
-  ];
-  const indexes = {
-    uk: import.meta.env.SEARCH_INDEX_UK || "staging_products_uk_en-gb",
-    it: import.meta.env.SEARCH_INDEX_IT || "staging_products_it_it",
-    de: import.meta.env.SEARCH_INDEX_DE || "staging_products_de_de",
-  };
+  const locales = LOCALES;
+  const indexes = getIndexes();
 
   const paths: { params: { country: string; language: string; product: string } }[] = [];
 
@@ -106,11 +99,7 @@ try {
 } catch (error) {
   console.error(`Error reading product data for ${product} in ${country}-${language}:`, error);
   // Fallback to API call if JSON file is not available (shouldn't happen in production)
-  const indexes = {
-    uk: import.meta.env.SEARCH_INDEX_UK || "staging_products_uk_en-gb",
-    it: import.meta.env.SEARCH_INDEX_IT || "staging_products_it_it",
-    de: import.meta.env.SEARCH_INDEX_DE || "staging_products_de_de",
-  };
+  const indexes = getIndexes();
 
   const response = await fetch(
     `${import.meta.env.PUBLIC_MEILISEARCH_URL}/indexes/${indexes[country as keyof typeof indexes]}/search`,

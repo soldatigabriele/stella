@@ -2,14 +2,10 @@
 const { pathname } = Astro.url;
 
 import { getSiteUrl } from '../utils/getSiteUrl.js';
+import { LOCALES, generateLocaleUrls } from '../config/locales.js';
 
 const siteUrl = getSiteUrl(pathname)
-
-const parts = pathname.split('/').filter(Boolean);
-
-const itUrl = '/' + ['it', 'it', ...parts.slice(2)].join('/');
-const ukUrl = '/' + ['uk', 'en', ...parts.slice(2)].join('/');
-const deUrl = '/' + ['de', 'de', ...parts.slice(2)].join('/');
+const localeUrls = generateLocaleUrls(pathname);
 
 import { getTranslations } from '../lib/translationService.js';
 const language = Astro.params.language || 'en';
@@ -40,9 +36,18 @@ const pageTranslations = translations[language] || {};
 					</nav>
 					
 					<div id="language-switcher" class="language-switcher">
-						<a href={ukUrl} class={`language-link ${(language === 'en' || language === 'uk') ? 'active' : ''}`}>🇬🇧 UK</a>
-						<a href={itUrl} class={`language-link ${language === 'it' ? 'active' : ''}`}>🇮🇹 IT</a>
-						<a href={deUrl} class={`language-link ${language === 'de' ? 'active' : ''}`}>🇩🇪 DE</a>
+						{LOCALES.map(({ country, language: localeLanguage, label }) => {
+							const urlKey = `${country}Url`;
+							const href = localeUrls[urlKey] || '/';
+							return (
+								<a 
+									href={href} 
+									class={`language-link ${(language === localeLanguage || (localeLanguage === 'en' && language === 'uk')) ? 'active' : ''}`}
+								>
+									{label}
+								</a>
+							);
+						})}
 					</div>
 				</div>
 			</div>
