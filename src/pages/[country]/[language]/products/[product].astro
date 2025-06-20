@@ -1,6 +1,8 @@
 ---
 import Layout from "../../../../layouts/Layout.astro";
 import "../../../../styles/product-page.scss";
+import fs from "fs";
+import path from "path";
 
 export async function getStaticPaths() {
   const locales = [
@@ -15,6 +17,12 @@ export async function getStaticPaths() {
   };
 
   const paths: { params: { country: string; language: string; product: string } }[] = [];
+
+  // Create a directory for storing product data
+  const dataDir = path.join(process.cwd(), "src", "data", "products");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
 
   for (const { country, language } of locales) {
     const index = indexes[country as keyof typeof indexes];
@@ -32,7 +40,10 @@ export async function getStaticPaths() {
 
     const data = await response.json();
 
+    // Save all product data to a JSON file for this country
+    const productsData: Record<string, any> = {};
     data.hits.forEach((hit: any) => {
+      productsData[hit.slug] = hit;
       paths.push({
         params: {
           country,
@@ -41,6 +52,11 @@ export async function getStaticPaths() {
         },
       });
     });
+
+    // Write the products data to a JSON file
+    const filePath = path.join(dataDir, `${country}-${language}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(productsData, null, 2));
+    console.log(`Saved ${Object.keys(productsData).length} products for ${country}-${language} to ${filePath}`);
   }
 
   return paths;
@@ -48,26 +64,41 @@ export async function getStaticPaths() {
 
 const { country, language, product } = Astro.params;
 
-// Now, fetch this product by slug:
-const indexes = {
+// Read product data from the saved JSON file instead of making an API call
+const dataDir = path.join(process.cwd(), "src", "data", "products");
+const filePath = path.join(dataDir, `${country}-${language}.json`);
+
+let p: any;
+try {
+  const productsData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  p = productsData[product!];
+  
+  if (!p) {
+    throw new Error(`Product ${product} not found in ${country}-${language} data`);
+  }
+} catch (error) {
+  console.error(`Error reading product data for ${product} in ${country}-${language}:`, error);
+  // Fallback to API call if JSON file is not available (shouldn't happen in production)
+  const indexes = {
     uk: import.meta.env.SEARCH_INDEX_UK || "staging_products_uk_en-gb",
     it: import.meta.env.SEARCH_INDEX_IT || "staging_products_it_it",
     de: import.meta.env.SEARCH_INDEX_DE || "staging_products_de_de",
   };
 
-const response = await fetch(
-  `${import.meta.env.PUBLIC_MEILISEARCH_URL}/indexes/${indexes[country as keyof typeof indexes]}/search`,
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${import.meta.env.PUBLIC_MEILISEARCH_API_KEY}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${import.meta.env.PUBLIC_MEILISEARCH_URL}/indexes/${indexes[country as keyof typeof indexes]}/search`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.PUBLIC_MEILISEARCH_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ q: product }),
     },
-    body: JSON.stringify({ q: product }),
-  },
-);
-const { hits } = await response.json();
-const p = hits[0];
+  );
+  const { hits } = await response.json();
+  p = hits[0];
+}
 
 // Prepare fallback image
 const firstVariation = p.variations?.[0];
