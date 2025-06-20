@@ -24,8 +24,12 @@ export async function getStaticPaths() {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 
-  for (const { country, language } of locales) {
+  // Make all API calls in parallel
+  console.log("Starting parallel API calls for all locales...");
+  const apiPromises = locales.map(async ({ country, language }) => {
     const index = indexes[country as keyof typeof indexes];
+    console.log(`Fetching products for ${country}-${language}...`);
+    
     const response = await fetch(
       `${import.meta.env.PUBLIC_MEILISEARCH_URL}/indexes/${index}/search`,
       {
@@ -39,12 +43,24 @@ export async function getStaticPaths() {
     );
 
     const data = await response.json();
+    console.log(`Received ${data.hits.length} products for ${country}-${language}`);
+    
+    return { country, language, hits: data.hits };
+  });
 
-    // Save all product data to a JSON file for this country
+  // Wait for all API calls to complete
+  const apiResults = await Promise.all(apiPromises);
+  console.log("All API calls completed, processing results...");
+
+  // Process results and write files in parallel
+  const fileWritePromises = apiResults.map(async ({ country, language, hits }) => {
     const productsData: Record<string, any> = {};
-    data.hits.forEach((hit: any) => {
+    const localPaths: { params: { country: string; language: string; product: string } }[] = [];
+
+    // Process hits for this locale
+    hits.forEach((hit: any) => {
       productsData[hit.slug] = hit;
-      paths.push({
+      localPaths.push({
         params: {
           country,
           language,
@@ -55,10 +71,21 @@ export async function getStaticPaths() {
 
     // Write the products data to a JSON file
     const filePath = path.join(dataDir, `${country}-${language}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(productsData, null, 2));
+    await fs.promises.writeFile(filePath, JSON.stringify(productsData, null, 2));
     console.log(`Saved ${Object.keys(productsData).length} products for ${country}-${language} to ${filePath}`);
-  }
+    
+    return localPaths;
+  });
 
+  // Wait for all file writes to complete and collect paths
+  const pathArrays = await Promise.all(fileWritePromises);
+  
+  // Flatten all paths into a single array
+  pathArrays.forEach(localPaths => {
+    paths.push(...localPaths);
+  });
+
+  console.log(`Total paths generated: ${paths.length}`);
   return paths;
 }
 
