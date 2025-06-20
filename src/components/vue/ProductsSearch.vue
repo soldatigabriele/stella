@@ -1,6 +1,6 @@
 <template>
-  <div class="products-search" id="products-page">
-    <ais-instant-search :search-client="searchClient" :index-name="productsIndex" :routing="routing">
+  <div class="products-search" ref="instantSearch" id="products-page">
+    <ais-instant-search  :search-client="searchClient" :index-name="productsIndex" :routing="routing">
       <ais-configure :hits-per-page.camel="12" :attributes-to-retrieve.camel="attributesToRetrieve" />
 
       <!-- Main Content -->
@@ -186,6 +186,7 @@ export default {
         this.hasRendered = true;
         this.isLoading = false;
         clearTimeout(minLoadingTime);
+        this.setupPaginationListener();
       }, 600);
     });
   },
@@ -231,6 +232,47 @@ export default {
         ...item,
         label: this.t(item.label),
       }));
+    },
+    setupPaginationListener() {
+      // Wait for InstantSearch to be fully initialized
+      this.$nextTick(() => {
+        const instantSearchInstance = this.$refs.instantSearch;
+        
+        if (instantSearchInstance && instantSearchInstance.instantSearchInstance) {
+          let currentPage = 0;
+          
+          // Listen to search state changes
+          instantSearchInstance.instantSearchInstance.on('render', () => {
+            const helper = instantSearchInstance.instantSearchInstance.helper;
+            const newPage = helper.state.page;
+            
+            // If page changed (and not the first render), scroll to top
+            if (newPage !== currentPage && this.hasRendered) {
+              this.scrollToTop();
+            }
+            currentPage = newPage;
+          });
+        } else {
+          // Fallback: try again after a short delay
+          setTimeout(() => this.setupPaginationListener(), 100);
+        }
+      });
+    },
+    scrollToTop() {
+      // Smooth scroll to top of the page
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      
+      // Alternative: scroll to the products section specifically
+      const productsPage = document.getElementById('products-page');
+      if (productsPage) {
+        productsPage.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
     },
   },
 };
